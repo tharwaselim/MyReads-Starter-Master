@@ -1,100 +1,91 @@
-import React, {useState} from 'react';
-import Shelf from './Shelf';
-//import { Link } from 'react-router-dom';
-import { search } from '../BooksAPI';
-//import axios from "axios";
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
+import * as BooksAPI from "../BooksAPI";
+import Book from "./Book";
 
 
-function Search (props) {
-    const [newQuery, setState]=useState(
-    {
-        query: '',
-        result: []
-    });
+class Search extends Component {
+  state = {
+    query: "",
+    books: [],
+  };
 
-//let cancelRequest = null;
-
-function queryChanged(e) {
-    setState({ query: e.target.value });
-    //toCancelRequests();
-    searchedBooks(e.target.value);
-     console.log('You\'re writing now: ', e.target.value)
-};
-
-// API Search Function
-const searchedBooks=function (query) {
-    search(query)
-    .then(res => 
-        (setState(currState =>({...currState,result:res}))));
-}
-
-/*const toCancelRequests = () => {
-    if(cancelRequest !== null) {
-        this.cancelRequest.cancel(
-            "request cancelled now!!!"
-        );
+  changeQuery = async (event) => {
+    const newQuery = event.target.value;
+    this.setState({ query: newQuery });
+    if (newQuery === "") {
+      this.setState({ books: [] });
+    } else if (newQuery) {
+      const searchedBooks = await this.getBooks(newQuery);
+      if (searchedBooks && searchedBooks.length > 0) {
+        this.setState({ books: searchedBooks });
+      } else {
+        this.setState({ books: [] });
+      }
     }
-    cancelRequest = axios.CancelToken.source();
-}*/
+  };
 
-        
-// function choosenBefore(result) {
-//     let hasShelf = props.books.filter(book => book.id === result.id);
-//     return hasShelf.length ? hasShelf[0].shelf : "none"}
+  getBooks = async (searchText) => {
+    try {
+      const searched = await BooksAPI.search(
+        searchText,
+      );
+     if (searched) {
+        const updatedBooks = this.updateShelves(searched);
+        return updatedBooks;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
+  updateShelves(searched) {
+    const { books } = this.props;
+    const updatedBooks = searched.map((searched) => {
+      books.forEach((homeBook) => {
+        if (homeBook.id === searched.id) {
+          searched.shelf = homeBook.shelf;
+        }
+      });
+      if (!searched.shelf) searched.shelf = "none";
+      return searched;
+    });
+    return updatedBooks;
+  }
+
+  render() {
+    const { onChangeBookShelf } = this.props;
+    const { books } = this.state;
     return (
-        <div className="search-books">
-            <div className="search-books-bar">
-            <button className="close-search" onClick={() => this.setState({ showSearchPage: false })}>Close</button>
-                <div className="search-books-input-wrapper">
-                    <input 
-                        type="text" 
-                        placeholder="Search by title or author"
-                        // value={state.query}
-                        onChange={(e)=>queryChanged(e)}
-                    />
-                </div>
-            </div>
-            <div className="search-books-results">
-                <ol className="books-grid">
-                    {(newQuery.query !== "")?
-
-                    ((Array.isArray(newQuery.result))?
-
-                    (newQuery.result.filter(book=> book.imageLinks !== undefined).map(book=>{
-                    const hasShelf=props.alreadyInShelf.find(hasShelf => hasShelf.id === book.id)
-                    
-                    if (hasShelf !== undefined) {
-                        return(
-                            <Shelf
-                                key={hasShelf.id}
-                                book={hasShelf}
-                                title={hasShelf.title}
-                                author={hasShelf.authors}
-                                imageURL={hasShelf.imageLinks.thumbnail}
-                                />
-                        )
-                    }else {
-                        return( 
-                            <Shelf
-                            key={book.id}
-                            book={book}
-                            title={book.title}
-                            author={book.authors}
-                            imageURL={book.imageLinks.thumbnail}
-
-                            />)}})):
-                            
-                            (<h1>No Match Found!!!</h1>) ) :
-
-                                (<div>write book name, please...</div>)
-                    }
-                    
-                </ol>
-            </div>
+      <div className="search-books">
+        <div className="search-books-bar">
+          <Link to="/" className="close-search">
+            Close
+          </Link>
+          <div className="search-books-input-wrapper">
+            <input
+              value={this.state.query}
+              onChange={this.changeQuery}
+              placeholder="Search by title or author"
+            />
+          </div>
         </div>
+        <div className="search-books-results">
+          <ol className="books-grid">
+            {books.length === 0 ? (
+              <li />
+            ) : (
+              books.map((book) => (
+                <li key={book.id}>
+                  <Book book={book} onChangeBookShelf={onChangeBookShelf} />
+                </li>
+              ))
+            )}
+          </ol>
+        </div>
+      </div>
     );
+  }
 }
-
 
 export default Search;
