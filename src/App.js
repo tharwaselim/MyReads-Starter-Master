@@ -1,75 +1,54 @@
-/* eslint-disable no-unused-expressions */
-import React from 'react'
-import * as BooksAPI from './BooksAPI'
-import './App.css'
-import Shelves from './components/Shelves'
-import Search from './components/Search'
-import SearchButton from './components/SearchButton';
-import Header from './components/Header'
-
+import React from "react";
+import * as BooksAPI from "./BooksAPI";
+import "./App.css";
+import Shelves from "./components/Shelves";
+import Search from "./components/Search";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
 class BooksApp extends React.Component {
   state = {
-    /**
-     * TODO: Instead of using this state variable to keep track of which page
-     * we're on, use the URL in the browser's address bar. This will ensure that
-     * users can use the browser's back and forward buttons to navigate between
-     * pages, as well as provide a good URL they can bookmark and share.
-     */
-    showSearchPage: false,
-    books:[],
-    query:""
+    books: [],
   };
 
-  updateSearch= state=>{
-    console.log("hi",state);
-    this.setState({showSearchPage:state});
+  componentDidMount() {
+    this.getBooks();
   }
 
-componentDidMount(){
-  BooksAPI.getAll().then((response=>this.setState({books:response})))
-}
+  getBooks = async () => {
+    const getBooks = await BooksAPI.getAll();
+    this.setState({ books: getBooks });
+  };
 
-changeBookShelf=(book,shelf) => {
-  console.log("hiii",this);
-  this.setState({
-    books:this.state.books.map(b => {
-      b.id === book.id ? (b.shelf = shelf) :b ;
-      return b;
-    })
-  });
-};
+  changeBookShelf = async (bookId, title) => {
+    this.updateBook(bookId, title);
+  };
+
+  updateBook = async (id, title) => {
+    await BooksAPI.update(id, title);
+    this.getBooks();
+  };
+
   render() {
-  //const {shelves, allBooks} = this.props;
     return (
       <div className="app">
-        {this.state.showSearchPage ? (
-
-          ////search
-          <Search showSearchPage={this.updateSearch }/>
-        ) : (
-          <div className="list-books">
-
-            {/*header*/}
-            
-            <Header />
-            <div className="list-books-content">
-                <>
-                    
-                </>
-</div>
-            {/*//shelves*/}
-         <Shelves  allBooks={this.state.books} 
-         changeShelf={this.changeBookShelf}/>
-            
-            {/*//search button*/}
-           
-            <SearchButton showSearchPage={this.updateSearch }/>
-          </div>
-        )}
+        <Router>
+          <Route exact path="/">
+            <Shelves
+              books={this.state.books}
+              onChangeBookShelf={this.changeBookShelf}
+            />
+          </Route>
+          <Route path="/search">
+            <Search
+              books={this.state.books}
+              onChangeBookShelf={this.changeBookShelf}
+            />
+          </Route>
+        </Router>
       </div>
-    )
+    );
   }
 }
 
-export default BooksApp
+export default BooksApp;
+
