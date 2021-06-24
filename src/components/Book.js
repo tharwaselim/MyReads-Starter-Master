@@ -1,31 +1,47 @@
-import React, { Component } from 'react';
+import React from "react";
+//import _ from "lodash";
 
-export default class Book extends Component {
+const Book = ({ book, onChangeBookShelf }) => {
+  const defaultCoverImage =
+    "https://cdn141.picsart.com/311796011013201.jpg?type=webp&to=crop&r=256";
 
-	     render() {
-		            const {book} = this.props;
-		            
-		            return (
-				            <div className="book"> 
-				             <div className="book-top">
-				                <div className="book-cover" style={{
-							                        width: 128,
-								                height: 193,
-								                backgroundImage: `url("${ book.imageLinks.thumbnail }")`
-							             }}/>
-				              <div className="book-shelf-changer">
-				                <select defaultValue={book.shelf} onChange={(event) => this.props.onCategoryChange(book, event.target.value)}>              
-				                       <option value="none" disabled>Move to...</option>
-				                       <option value="currentlyReading">Currently Reading</option>
-				                       <option value="wantToRead">Want to Read</option>
-				                       <option value="read">Read</option>
-				                       <option value="none">None</option>
-				                </select>
-				             </div>
-				             </div>
-				             <div className="book-title">{book.title}</div>
-				                    <div className="book-authors">{book.authors}</div>
-				              </div>
-			    );
-		}
-}
+  const changeBookShelf = (e) => {
+    let category = e.target.value;
+    onChangeBookShelf(book.id, category);
+  };
+
+  return (
+    
+      <div className="book">
+        <div className="book-top">
+          <div
+            className="book-cover"
+            style={{
+              width: 128,
+              height: 193,
+              backgroundImage: `url("${
+                book.imageLinks ? book.imageLinks.thumbnail : defaultCoverImage
+              }")`,
+            }}
+          />
+          <div className="book-shelf-changer">
+            <select value={book.shelf} onChange={changeBookShelf}>
+              <option value="move" disabled>
+                Move to...
+              </option>
+              <option value="currentlyReading">Currently Reading</option>
+              <option value="wantToRead">Want to Read</option>
+              <option value="read">Read</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+        </div>
+        <div className="book-title">{book.title}</div>
+        <div className="book-authors">{book.authors}</div>
+        </div>
+      
+    )
+;
+};
+
+export default Book;
