@@ -1,5 +1,5 @@
 import React from "react";
-
+import Select from "./Select";
 import { update } from '../BooksAPI';
 
 const Book = props=> {
@@ -24,17 +24,11 @@ const Book = props=> {
               }")`,
             }}
           />
-          <div className="book-shelf-changer">
-            <select value={book.shelf} onUpdate={(e)=>{choosingShelf(e)}}>
-              <option value="move" disabled>
-                Move to...
-              </option>
-              <option value="currentlyReading">Currently Reading</option>
-              <option value="wantToRead">Want to Read</option>
-              <option value="read">Read</option>
-              <option value="none">None</option>
-            </select>
-          </div>
+          
+          <Select shelf={(book.shelf !== undefined)?(book.shelf):("none")} onUpdate={(e)=>{choosingShelf(e)}}/>
+
+              
+          
         </div>
         <div className="book-title">{book.title}</div>
         <div className="book-authors">{book.authors}</div>
