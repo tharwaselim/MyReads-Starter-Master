@@ -1,14 +1,14 @@
 import React from "react";
-//import _ from "lodash";
 
-const Book = ({ book, onChangeBookShelf }) => {
+import { update } from '../BooksAPI';
+
+const Book = props=> {
+  const {book} = props;
   const defaultCoverImage =
     "https://cdn141.picsart.com/311796011013201.jpg?type=webp&to=crop&r=256";
-
-  const changeBookShelf = (e) => {
-    let category = e.target.value;
-    onChangeBookShelf(book.id, category);
-  };
+  function choosingShelf (shelfTitle) {
+      update(book, shelfTitle)
+  }
 
   return (
     
@@ -25,7 +25,7 @@ const Book = ({ book, onChangeBookShelf }) => {
             }}
           />
           <div className="book-shelf-changer">
-            <select value={book.shelf} onChange={changeBookShelf}>
+            <select value={book.shelf} onUpdate={(e)=>{choosingShelf(e)}}>
               <option value="move" disabled>
                 Move to...
               </option>
